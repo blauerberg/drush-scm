@@ -1,5 +1,5 @@
 # Drush scm
-Source code maangement script with drush.
+Source code management script with drush.
 
 ## Usage
 
