@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import json
+import subprocess
+import argparse
+
+def upc(args):
+    with open(os.devnull) as DEVNULL:
+        try:
+            cmd = "git status"
+            subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
+        except subprocess.CalledProcessError:
+            print "Your site doesn't seem to manage with git"
+            sys.exit(1)
+        
+        cmd = "drush --format=json ups --security-only"
+        update_status = subprocess.check_output(cmd, shell=True, stderr=DEVNULL)
+        json = json.loads(update_status)
+        modules = json.keys()
+        modules.remove("drupal")
+        
+        for module in modules:
+            name = json[module]["name"]
+            path = json[module]["path"]
+            latest_update = json[module]["security updates"][0]
+        
+            version = latest_update["version"]
+            release_link = latest_update["release_link"]
+        
+            cmd = "drush upc -y %(name)s %(version)s" % locals()
+            subprocess.call(cmd, shell=True, stderr=DEVNULL)
+        
+            cmd = "git add -A %(path)s" % locals()
+            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+        
+            cmd = 'git commit -m "%(name)s: update to %(version)s for security\n\n%(release_link)s"' % locals()
+            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(help='sub-command help')
+parser_upc = subparsers.add_parser('upc', help='upc help')
+parser_upc.set_defaults(func=upc)
+
+args = parser.parse_args() 
+args.func(args)
