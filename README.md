@@ -6,7 +6,7 @@ Source code management script with drush.
 ```
 $ git clone https://github.com/blauerberg/drush-scm.git
 $ cd {your_drupal_site_root}
-$ drush-scm upc
+$ /path/to/drush-scm upc
 ```
 
 ## License
