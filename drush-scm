@@ -17,14 +17,14 @@ def upc(args):
         
         cmd = "drush --format=json ups --security-only"
         update_status = subprocess.check_output(cmd, shell=True, stderr=DEVNULL)
-        json = json.loads(update_status)
-        modules = json.keys()
+        json_status = json.loads(update_status)
+        modules = json_status.keys()
         modules.remove("drupal")
         
         for module in modules:
-            name = json[module]["name"]
-            path = json[module]["path"]
-            latest_update = json[module]["security updates"][0]
+            name = json_status[module]["name"]
+            path = json_status[module]["path"]
+            latest_update = json_status[module]["security updates"][0]
         
             version = latest_update["version"]
             release_link = latest_update["release_link"]
