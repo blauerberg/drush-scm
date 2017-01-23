@@ -51,6 +51,6 @@ parser_upc.set_defaults(func=upc)
 args = parser.parse_args() 
 
 config = ConfigParser.ConfigParser()
-config.read(['drush-scm.ini', os.path.expanduser('~/.drush-scm.init')])
+config.read([os.path.join(os.path.dirname(os.path.realpath(__file__)), 'drush-scm.ini'), os.path.expanduser('~/.drush-scm.init')])
 
 args.func(args, config)
