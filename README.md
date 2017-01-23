@@ -20,5 +20,17 @@ $ /path/to/drush-scm upc --module panels
 $ /path/to/drush-scm upc --module views --version 7.x-3.5
 ```
 
+## Configuration
+
+You can configure some options by override drush-scm.ini.
+For example, if your Drupal site is in Docker container, you can use this script via `docker-compose`.
+
+```
+[common]
+# DrushCommand = drush
+# example for docker-compose
+DrushCommand = docker-compose exec -T php drush
+```
+
 ## License
 This software is released under the MIT License, see LICENSE.
