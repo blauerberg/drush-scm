@@ -17,7 +17,10 @@ def upc(args):
         
         cmd = "drush --format=json ups --security-only"
         update_status = subprocess.check_output(cmd, shell=True, stderr=DEVNULL)
-        json_status = json.loads(update_status)
+        # workaround for "docker-compose run -T" inconsistently outputs stdout / stderr?
+        # see also: https://github.com/docker/compose/issues/3267
+        start = update_status.index("{")
+        json_status = json.loads(update_status[update_status.index("{"):])
         modules = json_status.keys()
         modules.remove("drupal")
         
