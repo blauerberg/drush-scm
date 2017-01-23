@@ -44,8 +44,8 @@ def upc(args, config):
             subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
 
 parser = argparse.ArgumentParser()
-subparsers = parser.add_subparsers(help='sub-command help')
-parser_upc = subparsers.add_parser('upc', help='upc help')
+subparsers = parser.add_subparsers()
+parser_upc = subparsers.add_parser('upc', help='Execute drush pm-updatecode and update your git repositoy.')
 parser_upc.set_defaults(func=upc)
 
 args = parser.parse_args() 
