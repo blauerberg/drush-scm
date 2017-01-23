@@ -70,6 +70,6 @@ parser_upc.add_argument('--version', action='store', default=False,
 args = parser.parse_args() 
 
 config = ConfigParser.ConfigParser()
-config.read([os.path.join(os.path.dirname(os.path.realpath(__file__)), 'drush-scm.ini'), os.path.expanduser('~/.drush-scm.init')])
+config.read([os.path.join(os.path.dirname(os.path.realpath(__file__)), 'drush-scm.ini'), os.path.expanduser('~/.drush-scm.ini')])
 
 args.func(args, config)
