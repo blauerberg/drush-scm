@@ -28,6 +28,9 @@ def upc(args, config):
         
         for module in modules:
             name = json_status[module]["name"]
+            if args.module != 'all' and args.module != name:
+                continue
+
             path = json_status[module]["path"]
             latest_update = json_status[module]["security updates"][0]
         
@@ -47,6 +50,8 @@ parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers()
 parser_upc = subparsers.add_parser('upc', help='Execute drush pm-updatecode and update your git repositoy.')
 parser_upc.set_defaults(func=upc)
+parser_upc.add_argument('--module', action='store', default='all',
+    help='module name to update. If omitted, all modules expect core will be updated.')
 
 args = parser.parse_args() 
 
