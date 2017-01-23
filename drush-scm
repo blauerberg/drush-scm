@@ -9,6 +9,7 @@ import ConfigParser
 
 def upc(args, config):
     drush = config.get("common", "DrushCommand")
+    apply_non_security_update = args.apply_non_security_update
     with open(os.devnull) as DEVNULL:
         try:
             cmd = "git status"
@@ -17,7 +18,9 @@ def upc(args, config):
             print "Your site doesn't seem to manage with git"
             sys.exit(1)
         
-        cmd = drush + " ups --format=json --security-only"
+        cmd = drush + " ups --format=json"
+        if not apply_non_security_update:
+            cmd = cmd + " --security-only"
         update_status = subprocess.check_output(cmd, shell=True, stderr=DEVNULL)
         # workaround for "docker-compose run -T" inconsistently outputs stdout / stderr?
         # see also: https://github.com/docker/compose/issues/3267
@@ -35,12 +38,14 @@ def upc(args, config):
             path = json_status[module]["path"]
             matched_update = False
             if args.version == False:
-                matched_update = json_status[module]["security updates"][0]
+                if apply_non_security_update:
+                    matched_update = json_status[module]["releases"][json_status[module]["latest_version"]]
+                else:
+                    matched_update = json_status[module]["security updates"][0]
             else:
-                for update in json_status[module]["security updates"]:
-                    if args.version == update["version"]:
-                        print update["version"]
-                        matched_update = update
+                for k, v in json_status[module]["releases"].iteritems():
+                    if args.version == k:
+                        matched_update = v
 
             if matched_update == False:
                 print "%s %s cann't found in releases, please check project page in drupal.org" % (name, args.version)
@@ -73,7 +78,8 @@ parser_upc.add_argument('--module', action='store', default='all',
     help='module name to update. If omitted, all modules expect core will be updated.')
 parser_upc.add_argument('--version', action='store', default=False,
     help='version of the module to update. If omitted, the latest version will be used.')
-
+parser_upc.add_argument('--apply-non-security-update', action='store_true', default=False,
+    help="update code even if is hasn't security fixes.")
 
 args = parser.parse_args() 
 
