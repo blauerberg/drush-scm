@@ -5,8 +5,10 @@ import sys
 import json
 import subprocess
 import argparse
+import ConfigParser
 
-def upc(args):
+def upc(args, config):
+    drush = config.get("common", "DrushCommand")
     with open(os.devnull) as DEVNULL:
         try:
             cmd = "git status"
@@ -15,7 +17,7 @@ def upc(args):
             print "Your site doesn't seem to manage with git"
             sys.exit(1)
         
-        cmd = "drush --format=json ups --security-only"
+        cmd = drush + " ups --format=json --security-only"
         update_status = subprocess.check_output(cmd, shell=True, stderr=DEVNULL)
         # workaround for "docker-compose run -T" inconsistently outputs stdout / stderr?
         # see also: https://github.com/docker/compose/issues/3267
@@ -32,7 +34,7 @@ def upc(args):
             version = latest_update["version"]
             release_link = latest_update["release_link"]
         
-            cmd = "drush upc -y %(name)s %(version)s" % locals()
+            cmd = drush + " upc -y %(name)s %(version)s" % locals()
             subprocess.call(cmd, shell=True, stderr=DEVNULL)
         
             cmd = "git add -A %(path)s" % locals()
@@ -47,4 +49,8 @@ parser_upc = subparsers.add_parser('upc', help='upc help')
 parser_upc.set_defaults(func=upc)
 
 args = parser.parse_args() 
-args.func(args)
+
+config = ConfigParser.ConfigParser()
+config.read(['drush-scm.ini', os.path.expanduser('~/.drush-scm.init')])
+
+args.func(args, config)
