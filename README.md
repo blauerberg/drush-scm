@@ -1,5 +1,6 @@
 # Drush scm
 Source code management script with drush.
+This script updates Drupal using [drush](http://www.drush.org/en/master/) and helps version control of git managed source code.
 
 ## Usage
 
