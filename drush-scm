@@ -7,6 +7,15 @@ import subprocess
 import argparse
 import ConfigParser
 
+def ups(args, config):
+    drush = config.get("common", "DrushCommand")
+    include_non_security_update = args.include_non_security_update
+    with open(os.devnull) as DEVNULL:
+        cmd = drush + " ups"
+        if not include_non_security_update:
+            cmd = cmd + " --security-only"
+        subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
+
 def upc(args, config):
     drush = config.get("common", "DrushCommand")
     apply_non_security_update = args.apply_non_security_update
@@ -80,6 +89,10 @@ parser_upc.add_argument('--version', action='store', default=False,
     help='version of the module to update. If omitted, the latest version will be used.')
 parser_upc.add_argument('--apply-non-security-update', action='store_true', default=False,
     help="update code even if is hasn't security fixes.")
+parser_ups = subparsers.add_parser('ups', help='Execute drush pm-updatestatus.')
+parser_ups.set_defaults(func=ups)
+parser_ups.add_argument('--include-non-security-update', action='store_true', default=False,
+    help="show updates even if is hasn't security fixes.")
 
 args = parser.parse_args() 
 
