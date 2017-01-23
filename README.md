@@ -11,8 +11,11 @@ $ cd {your_drupal_site_root}
 # show help message
 $ /path/to/drush-scm upc -h
 
-# update all modules to lastest version
+# update all modules except core to lastest version
 $ /path/to/drush-scm upc
+
+# update only Drupal core
+$ /path/to/drush-scm upc --module drupal
 
 # update only panels
 $ /path/to/drush-scm upc --module panels

@@ -24,7 +24,8 @@ def upc(args, config):
         start = update_status.index("{")
         json_status = json.loads(update_status[update_status.index("{"):])
         modules = json_status.keys()
-        modules.remove("drupal")
+        if args.module == 'all' or args.module != 'drupal':
+            modules.remove("drupal")
         
         for module in modules:
             name = json_status[module]["name"]
@@ -51,11 +52,18 @@ def upc(args, config):
             cmd = drush + " upc -y %(name)s %(version)s" % locals()
             subprocess.call(cmd, shell=True, stderr=DEVNULL)
         
-            cmd = "git add -A %(path)s" % locals()
-            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+            if module != 'drupal':
+                cmd = "git add -A %(path)s" % locals()
+                subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
         
-            cmd = 'git commit -m "%(name)s: update to %(version)s for security\n\n%(release_link)s"' % locals()
-            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+                cmd = 'git commit -m "%(name)s: update to %(version)s for security\n\n%(release_link)s"' % locals()
+                subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+            else:
+                print "Drupal core updated to %s, but the git reopsitory hasn't been updated yet because some confirmation is required." % (version)
+                print "Please check the following article and manually update the git repository."
+                print "For Drupal 8: https://www.drupal.org/docs/8/update/update-procedure-in-drupal-8"
+                print "For Drupal 7: https://www.drupal.org/docs/7/updating-your-drupal-site/how-to-update-drupal-core"
+                sys.exit(0)
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers()
