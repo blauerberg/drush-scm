@@ -37,7 +37,8 @@ def upc(args, config):
         json_status = json.loads(update_status[update_status.index("{"):])
         modules = json_status.keys()
         if args.module == 'all' or args.module != 'drupal':
-            modules.remove("drupal")
+            if 'drupal' in modules:
+                modules.remove("drupal")
         
         for module in modules:
             name = json_status[module]["name"]
