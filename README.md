@@ -19,6 +19,9 @@ $ /path/to/drush-scm ups
 # update all modules except core to latest version with security fixes
 $ /path/to/drush-scm upc
 
+# update all modules other than views and panels
+$ /path/to/drush-scm upc --exclude-module views,panels
+
 # update only Drupal core
 $ /path/to/drush-scm upc --module drupal
 
