@@ -39,6 +39,10 @@ def upc(args, config):
         if args.module == 'all' or args.module != 'drupal':
             if 'drupal' in modules:
                 modules.remove("drupal")
+
+        for module in args.exclude_module.split(","):
+            if module in modules:
+                modules.remove(module)
         
         for module in modules:
             name = json_status[module]["name"]
@@ -86,6 +90,8 @@ parser_upc = subparsers.add_parser('upc', help='Execute drush pm-updatecode and 
 parser_upc.set_defaults(func=upc)
 parser_upc.add_argument('--module', action='store', default='all',
     help='module name to update. If omitted, all modules expect core will be updated.')
+parser_upc.add_argument('--exclude-module', action='store', default='',
+    help='module name that to be excluded from update. If multiple, it should be separated by a comma.')
 parser_upc.add_argument('--version', action='store', default=False,
     help='version of the module to update. If omitted, the latest version will be used.')
 parser_upc.add_argument('--apply-non-security-update', action='store_true', default=False,
