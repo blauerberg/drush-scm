@@ -85,17 +85,21 @@ def upc(args, config):
             cmd = "git add -A %(path)s" % locals()
             subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
 
-            cmd = 'git commit -m "%(name)s: update to %(version)s for security\n\n%(release_link)s"' % locals()
-            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+            message = []
+            message.append("%(name)s: update to %(version)s for security\n\n%(release_link)s" % locals())
             if module == 'drupal':
-                print "Drupal core updated to %s, but following files assume unchanged." % (version)
-                print "  - %s" % ", ".join(exclude_files)
-                print ""
-                print "You can see changes at this update in: https://github.com/drupal/drupal/compare/%s...%s" \
-                    % (existing_version, version)
-                print "Please check the following article and manually update the git repository if neccesaly."
-                print "For Drupal 8: https://www.drupal.org/docs/8/update/update-procedure-in-drupal-8"
-                print "For Drupal 7: https://www.drupal.org/docs/7/updating-your-drupal-site/how-to-update-drupal-core"
+                message.append("Drupal core updated to %s, but following files assume unchanged." % (version))
+                message.append("  - %s" % ", ".join(exclude_files))
+                message.append("")
+                message.append( "You can see changes at this update in: https://github.com/drupal/drupal/compare/%s...%s" \
+                    % (existing_version, version))
+                message.append("Please check the following article and manually update the git repository if necessary.")
+                message.append("  - For Drupal 8: https://www.drupal.org/docs/8/update/update-procedure-in-drupal-8")
+                message.append("  - For Drupal 7: https://www.drupal.org/docs/7/updating-your-drupal-site/how-to-update-drupal-core")
+            message = "\n".join(message)
+            print message
+            cmd = 'git commit -m "%s"' % message
+            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers()
