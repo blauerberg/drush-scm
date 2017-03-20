@@ -16,7 +16,7 @@ $ /path/to/drush-scm upc -h
 # show unapplied security updates
 $ /path/to/drush-scm ups
 
-# update all modules except core to latest version with security fixes
+# update core and all modules to latest version with security fixes
 $ /path/to/drush-scm upc
 
 # update all modules other than views and panels

@@ -40,9 +40,6 @@ def upc(args, config):
         start = update_status.index("{")
         json_status = json.loads(update_status[update_status.index("{"):])
         modules = json_status.keys()
-        if args.module == 'all' or args.module != 'drupal':
-            if 'drupal' in modules:
-                modules.remove("drupal")
 
         for module in args.exclude_module.split(","):
             if module in modules:
@@ -99,7 +96,6 @@ def upc(args, config):
                 print "Please check the following article and manually update the git repository if neccesaly."
                 print "For Drupal 8: https://www.drupal.org/docs/8/update/update-procedure-in-drupal-8"
                 print "For Drupal 7: https://www.drupal.org/docs/7/updating-your-drupal-site/how-to-update-drupal-core"
-                sys.exit(0)
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers()
