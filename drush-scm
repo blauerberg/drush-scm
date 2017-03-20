@@ -30,7 +30,7 @@ def upc(args, config):
         except subprocess.CalledProcessError:
             print "Your site doesn't seem to manage with git"
             sys.exit(1)
-        
+
         cmd = drush + " ups --format=json"
         if not apply_non_security_update:
             cmd = cmd + " --security-only"
@@ -118,7 +118,7 @@ parser_ups.set_defaults(func=ups)
 parser_ups.add_argument('--include-non-security-update', action='store_true', default=False,
     help="show updates even if is hasn't security fixes.")
 
-args = parser.parse_args() 
+args = parser.parse_args()
 
 config = ConfigParser.ConfigParser()
 config.read([os.path.join(os.path.dirname(os.path.realpath(__file__)), 'drush-scm.ini'), os.path.expanduser('~/.drush-scm/drush-scm.ini')])
