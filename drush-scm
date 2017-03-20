@@ -18,6 +18,10 @@ def ups(args, config):
 
 def upc(args, config):
     drush = config.get("common", "DrushCommand")
+    owner = config.get("common", "Owner")
+    group = config.get("common", "Group")
+    exclude_files = map(lambda x:x.lstrip().strip(), config.get("common", "ExcludeFiles").split(','))
+
     apply_non_security_update = args.apply_non_security_update
     with open(os.devnull) as DEVNULL:
         try:
@@ -43,13 +47,14 @@ def upc(args, config):
         for module in args.exclude_module.split(","):
             if module in modules:
                 modules.remove(module)
-        
+
         for module in modules:
             name = json_status[module]["name"]
             if args.module != 'all' and args.module != name:
                 continue
 
-            path = json_status[module]["path"]
+            path = json_status[module]["path"] or '.'
+
             matched_update = False
             if args.version == False:
                 if apply_non_security_update:
@@ -65,21 +70,33 @@ def upc(args, config):
                 print "%s %s cann't found in releases, please check project page in drupal.org" % (name, args.version)
                 sys.exit(1)
 
+            existing_version = json_status[module]["existing_version"]
             version = matched_update["version"]
             release_link = matched_update["release_link"]
-        
+
             cmd = drush + " upc -y %(name)s %(version)s" % locals()
             subprocess.call(cmd, shell=True, stderr=DEVNULL)
-        
-            if module != 'drupal':
-                cmd = "git add -A %(path)s" % locals()
-                subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
-        
-                cmd = 'git commit -m "%(name)s: update to %(version)s for security\n\n%(release_link)s"' % locals()
-                subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
-            else:
-                print "Drupal core updated to %s, but the git reopsitory hasn't been updated yet because some confirmation is required." % (version)
-                print "Please check the following article and manually update the git repository."
+
+            if owner and group:
+                cmd = "sudo chown -R %(owner)s:%(group)s .git %(path)s" % locals()
+                subprocess.call(cmd, shell=True, stderr=DEVNULL)
+
+            for exclude_file in exclude_files:
+                cmd = "git checkout %(exclude_file)s" % locals()
+                subprocess.call(cmd, shell=True, stderr=DEVNULL)
+
+            cmd = "git add -A %(path)s" % locals()
+            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+
+            cmd = 'git commit -m "%(name)s: update to %(version)s for security\n\n%(release_link)s"' % locals()
+            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+            if module == 'drupal':
+                print "Drupal core updated to %s, but following files assume unchanged." % (version)
+                print "  - %s" % ", ".join(exclude_files)
+                print ""
+                print "You can see changes at this update in: https://github.com/drupal/drupal/compare/%s...%s" \
+                    % (existing_version, version)
+                print "Please check the following article and manually update the git repository if neccesaly."
                 print "For Drupal 8: https://www.drupal.org/docs/8/update/update-procedure-in-drupal-8"
                 print "For Drupal 7: https://www.drupal.org/docs/7/updating-your-drupal-site/how-to-update-drupal-core"
                 sys.exit(0)
