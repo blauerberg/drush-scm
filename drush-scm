@@ -71,7 +71,7 @@ def upc(args, config):
             version = matched_update["version"]
             release_link = matched_update["release_link"]
 
-            cmd = drush + " upc -y %(name)s %(version)s" % locals()
+            cmd = drush + " upc -y %(name)s-%(version)s" % locals()
             subprocess.call(cmd, shell=True, stderr=DEVNULL)
 
             if owner and group:
