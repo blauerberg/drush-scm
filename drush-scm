@@ -26,7 +26,7 @@ def ups(args, config):
     if int(major_version) >= 9:
         ups_with_composer(args, config)
     else:
-        ups_regacy(args, config)
+        ups_legacy(args, config)
 
 def ups_with_composer(args, config):
     drush = config.get("common", "DrushCommand")
@@ -41,7 +41,7 @@ def ups_with_composer(args, config):
             # if you have something outdated, drush pm:secrity will return non-zero status code..
             sys.exit(0)
 
-def ups_regacy(args, config):
+def ups_legacy(args, config):
     drush = config.get("common", "DrushCommand")
     include_non_security_update = args.include_non_security_update
     with open(os.devnull) as DEVNULL:
