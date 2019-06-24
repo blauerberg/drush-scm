@@ -17,7 +17,7 @@ def get_drush_major_version(config):
             matches = re.search(r"Drush [vV]ersion\s+:\s+(.+)\.(.+)\.(.+)", version_output)
             return matches.group(1)
         except subprocess.CalledProcessError:
-            print "something is wrong.."
+            print "Cann't get drush version."
             sys.exit(1)
 
 def ups(args, config):
