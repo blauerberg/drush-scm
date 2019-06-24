@@ -6,8 +6,42 @@ import json
 import subprocess
 import argparse
 import ConfigParser
+import re
+
+def get_drush_major_version(config):
+    drush = config.get("common", "DrushCommand")
+    with open(os.devnull) as DEVNULL:
+        cmd = drush + " version"
+        try:
+            version_output = subprocess.check_output(cmd, shell=True, stderr=DEVNULL)
+            matches = re.search(r"Drush [vV]ersion\s+:\s+(.+)\.(.+)\.(.+)", version_output)
+            return matches.group(1)
+        except subprocess.CalledProcessError:
+            print "something is wrong.."
+            sys.exit(1)
 
 def ups(args, config):
+    major_version = get_drush_major_version(config)
+    
+    if int(major_version) >= 9:
+        ups_with_composer(args, config)
+    else:
+        ups_regacy(args, config)
+
+def ups_with_composer(args, config):
+    drush = config.get("common", "DrushCommand")
+    include_non_security_update = args.include_non_security_update
+    with open(os.devnull) as DEVNULL:
+        cmd = drush + " pm:security"
+        if include_non_security_update:
+            print "--include-non-security-update is not support by drush 9.x later, so it will be ignore."
+        try:
+            subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
+        except subprocess.CalledProcessError:
+            # if you have something outdated, drush pm:secrity will return non-zero status code..
+            sys.exit(0)
+
+def ups_regacy(args, config):
     drush = config.get("common", "DrushCommand")
     include_non_security_update = args.include_non_security_update
     with open(os.devnull) as DEVNULL:
