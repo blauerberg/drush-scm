@@ -51,9 +51,22 @@ def ups_legacy(args, config):
             cmd = cmd + " --security-only"
         subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
 
+def is_managed_by_git():
+    with open(os.devnull) as DEVNULL:
+        try:
+            cmd = "git status"
+            subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
+        except subprocess.CalledProcessError:
+            return False
+        
+        return True
+
 def upc(args, config):
+    if not is_managed_by_git():
+        logging.error("Your site doesn't seem to manage with git")
+        sys.exit(1)
+
     major_version = get_drush_major_version(config)
-    
     if int(major_version) >= 9:
         upc_with_composer(args, config)
     else:
@@ -71,13 +84,6 @@ def upc_with_composer(args, config):
         logging.warn("--version is not support by drush 9.x later, so it will be ignore.")
 
     with open(os.devnull) as DEVNULL:
-        try:
-            cmd = "git status"
-            subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
-        except subprocess.CalledProcessError:
-            logging.error("Your site doesn't seem to manage with git")
-            sys.exit(1)
-
         security_status = ''
         try:
             cmd = drush + " pm:security --format=json"
@@ -136,13 +142,6 @@ def upc_legacy(args, config):
 
     apply_non_security_update = args.apply_non_security_update
     with open(os.devnull) as DEVNULL:
-        try:
-            cmd = "git status"
-            subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
-        except subprocess.CalledProcessError:
-            logging.error("Your site doesn't seem to manage with git")
-            sys.exit(1)
-
         cmd = drush + " ups --format=json"
         if not apply_non_security_update:
             cmd = cmd + " --security-only"
