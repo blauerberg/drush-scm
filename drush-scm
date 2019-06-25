@@ -81,7 +81,7 @@ def upc_with_composer(args, config):
         try:
             cmd = drush + " pm:security --format=json"
             cmd_output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-            security_status = json.loads(cmd_output[ecmd_output.index("{"):])
+            security_status = json.loads(cmd_output[cmd_output.index("{"):])
     
         except subprocess.CalledProcessError, e:
             # if you have something outdated, drush pm:secrity will return non-zero status code..
