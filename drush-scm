@@ -51,6 +51,83 @@ def ups_legacy(args, config):
         subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
 
 def upc(args, config):
+    major_version = get_drush_major_version(config)
+    
+    if int(major_version) >= 9:
+        upc_with_composer(args, config)
+    else:
+        upc_legacy(args, config)
+
+def upc_with_composer(args, config):
+    drush = config.get("common", "DrushCommand")
+    owner = config.get("common", "Owner")
+    group = config.get("common", "Group")
+    exclude_files = map(lambda x:x.lstrip().strip(), config.get("common", "ExcludeFiles").split(','))
+
+    if args.apply_non_security_update:
+        print "--apply-non-security-update is not support by drush 9.x later, so it will be ignore."
+    if args.version != False:
+        print "--version is not support by drush 9.x later, so it will be ignore."
+
+    with open(os.devnull) as DEVNULL:
+        try:
+            cmd = "git status"
+            subprocess.check_call(cmd.split(" "), stderr=DEVNULL)
+        except subprocess.CalledProcessError:
+            print "Your site doesn't seem to manage with git"
+            sys.exit(1)
+
+        security_status = ''
+        try:
+            cmd = drush + " pm:security --format=json"
+            cmd_output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+            security_status = json.loads(cmd_output[ecmd_output.index("{"):])
+    
+        except subprocess.CalledProcessError, e:
+            # if you have something outdated, drush pm:secrity will return non-zero status code..
+            security_status = json.loads(e.output[e.output.index("{"):])
+
+        modules = security_status.keys()
+        for module in args.exclude_module.split(","):
+            if module in modules:
+                modules.remove(module)
+
+        for module in modules:
+            if args.module != 'all' and args.module != module:
+                continue
+
+            cmd = "composer require \"%(module)s\"" % locals()
+            if module == 'drupal/core':
+                cmd = "composer update drupal/core webflo/drupal-core-require-dev --with-dependencies"
+
+            print cmd
+            subprocess.call(cmd, shell=True, stderr=DEVNULL)
+
+            if owner and group:
+                cmd = "sudo chown -R %(owner)s:%(group)s .git vendor composer.*"
+                subprocess.call(cmd, shell=True, stderr=DEVNULL)
+
+            for exclude_file in exclude_files:
+                cmd = "git checkout %(exclude_file)s" % locals()
+                subprocess.call(cmd, shell=True, stderr=DEVNULL)
+
+            cmd = "git add -A"
+            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+
+            message = []
+            message.append("%(module)s: update for security\n\n" % locals())
+            if module == 'drupal/core':
+                message.append("Drupal core updated, but following files assume unchanged.")
+                message.append("  - %s" % ", ".join(exclude_files))
+                message.append("")
+                message.append("Please check the following article and manually update the git repository if necessary.")
+                message.append("  - For Drupal 8: https://www.drupal.org/docs/8/update/update-procedure-in-drupal-8")
+            message = "\n".join(message)
+            print message
+            cmd = 'git commit -m "%s"' % message
+            subprocess.call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+
+def upc_legacy(args, config):
     drush = config.get("common", "DrushCommand")
     owner = config.get("common", "Owner")
     group = config.get("common", "Group")
