@@ -2,7 +2,34 @@
 Source code management script with drush.
 This script updates Drupal using [drush](http://www.drush.org/en/master/) and helps version control of git managed source code.
 
-## Usage
+## Usage (for Drush 9.x or later)
+
+```bash
+$ git clone https://github.com/blauerberg/drush-scm.git
+$ cd {your_drupal_site_root}
+
+# show help message
+$ /path/to/drush-scm -h
+$ /path/to/drush-scm ups -h
+$ /path/to/drush-scm upc -h
+
+# show unapplied security updates
+$ /path/to/drush-scm ups
+
+# update core and all modules to latest version with security fixes
+$ /path/to/drush-scm upc
+
+# update all modules other than addtoany and devel
+$ /path/to/drush-scm upc --exclude-module drupal/addtoany,drupal/devel
+
+# update only Drupal core
+$ /path/to/drush-scm upc --module drupal/core
+
+# update only addtoany
+$ /path/to/drush-scm upc --module drupal/addtoany
+```
+
+## Usage (for Drush 8.x)
 
 ```bash
 $ git clone https://github.com/blauerberg/drush-scm.git
